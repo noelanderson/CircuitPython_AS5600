@@ -14,6 +14,7 @@ Implementation Notes
 --------------------
 
 **Hardware:**
+
 * AS5600 <https://ams.com/as5600>
 
 **Software and Dependencies:**
@@ -21,7 +22,7 @@ Implementation Notes
 * Adafruit CircuitPython firmware for the supported boards:
   https://circuitpython.org/downloads
 
-# * Adafruit's Bus Device library: https://github.com/adafruit/Adafruit_CircuitPython_BusDevice
+* Adafruit's Bus Device library: https://github.com/adafruit/Adafruit_CircuitPython_BusDevice
 """
 
 # imports
@@ -179,9 +180,13 @@ class AS5600:  # noqa PLR0904
     @property
     def angle(self):
         """
-        Get the current 12-bit angle (ANGLE).
+        Get the current 12-bit angle value (ANGLE).
 
-        :return: The current angle as an integer.
+        If zero_position() and max_position(), or max_angle() has been set then
+        this value is scaled to those limits.
+        Else it is scaled to 0-360 degrees, with 4095 representing 360 degrees.
+
+        :return: The current angle value as an integer.
         :rtype: int
         """
         return self._read_16(_REG_ANGLE_HI)
@@ -209,7 +214,7 @@ class AS5600:  # noqa PLR0904
     @property
     def is_magnet_too_strong(self) -> bool:
         """
-        Test MH Status Bit.
+        Test MH Status Bit. True if AGC minimum gain overflow, magnet too strong
 
         :return: True if the magnet is too strong, False otherwise.
         :rtype: bool
@@ -223,7 +228,7 @@ class AS5600:  # noqa PLR0904
     @property
     def is_magnet_too_weak(self) -> bool:
         """
-        Test ML Status Bit.
+        Test ML Status Bit. True if AGC maximum gain overflow, magnet too weak
 
         :return: True if the magnet is too weak, False otherwise.
         :rtype: bool
@@ -265,7 +270,7 @@ class AS5600:  # noqa PLR0904
     @property
     def magnitude(self) -> int:
         """
-        Get the 12-bit CORDIC magnitude (MAGNITUDE).
+        Get the 12-bit CORDIC (Coordinate Rotation Digital Computer) magnitude (MAGNITUDE).
 
         :return: The magnitude value as an integer.
         :rtype: int
@@ -297,6 +302,15 @@ class AS5600:  # noqa PLR0904
         """
         Get and set the 12-bit zero position (ZPOS).
 
+        For applications which do not use the full 0 to 360 degree angular range, the output
+        resolution can be enhanced by programming the range which is actually used. In this case,
+        the full resolution of the output is automatically scaled to the programmed angular range.
+        The angular range must be greater than 18 degrees.
+
+        Set by a combination of zero_position & max_position (ZPOS and MPOS).
+
+        It can also be set by max_angle.
+
         :return: The zero position as an integer.
         :rtype: int
         """
@@ -313,6 +327,15 @@ class AS5600:  # noqa PLR0904
         """
         Get and set the 12-bit maximum position (MPOS).
 
+        For applications which do not use the full 0 to 360 degree angular range, the output
+        resolution can be enhanced by programming the range which is actually used. In this case,
+        the full resolution of the output is automatically scaled to the programmed angular range.
+        The angular range must be greater than 18 degrees.
+
+        Set by a combination of zero_position & max_position (ZPOS and MPOS).
+
+        It can also be set by max_angle.
+
         :return: The maximum position as an integer.
         :rtype: int
         """
@@ -327,23 +350,36 @@ class AS5600:  # noqa PLR0904
     @property
     def max_angle(self) -> int:
         """
-        Get and set the 12-bit maximum angle (MANG).
+        Get and set the maximum anglular range (MANG) in degrees.
 
-        :return: The maximum angle as an integer.
+        For applications which do not use the full 0 to 360 degree angular range, the output
+        resolution can be enhanced by programming the range which is actually used. In this case,
+        the full resolution of the output is automatically scaled to the programmed angular range.
+        The angular range must be greater than 18 degrees.
+
+        It can also be set by a combination of zero_position & max_position (ZPOS and MPOS).
+
+        :return: The maximum angle in degrees as an integer.
         :rtype: int
         """
-        return self._read_16(_REG_MANG_HI)
+        raw_angle = self._read_16(_REG_MANG_HI)
+        angle = int((raw_angle / 4096) * 360)
+        return angle
 
     @max_angle.setter
     def max_angle(self, value: int):
-        if not 0 <= value <= 4095:
-            raise ValueError("Value must be between 0 & 4095")
-        self._write_16(_REG_MANG_HI, value)
+        if not 18 <= value <= 360:
+            raise ValueError("Value must be between 18 & 360")
+
+        raw_angle = int((value / 360) * 4096)
+        self._write_16(_REG_MANG_HI, raw_angle)
 
     @property
     def power_mode(self) -> int:
         """
         Get and set the Power Mode (PM) configuration.
+
+        Valid values: POWER_MODE_NOM, POWER_MODE_LPM1, POWER_MODE_LPM2 & POWER_MODE_LPM3
 
         :return: The power mode as an integer.
         :rtype: int
@@ -363,7 +399,8 @@ class AS5600:  # noqa PLR0904
     def hysteresis(self) -> int:
         """
         Get and set the Hysteresis (HYST) configuration.
-        Set to avoid toggling of the output when the magnet is not moving.
+        Set this to avoid toggling of the output when the magnet is not moving.
+
         Valid values: HYSTERESIS_OFF, HYSTERESIS_1LSB, HYSTERESIS_2LSB & HYSTERESIS_3LSB
 
         :return: The hysteresis value as an integer.
@@ -385,6 +422,7 @@ class AS5600:  # noqa PLR0904
         """
         Get and set the Output Stage configuration.
         This controls the output of pin 3 (OUT) as either an analog or PWM signal.
+
         Valid values: OUTPUT_STAGE_ANALOG_FULL, OUTPUT_STAGE_ANALOG_REDUCED, \
         OUTPUT_STAGE_DIGITAL_PWM
 
@@ -406,7 +444,9 @@ class AS5600:  # noqa PLR0904
     def pwm_frequency(self) -> int:
         """
         Get and set the PWM Frequency (PWMF) configuration.
-        Sets the frequency of the PWM output. Ignored if output_stage is not analog.
+        Sets the frequency of the PWM output.
+
+        Ignored if output_stage is set as Analog.
         Valid values: PWM_FREQUENCY_115HZ, PWM_FREQUENCY_230HZ, PWM_FREQUENCY_460HZ \
         & PWM_FREQUENCY_920HZ
 
@@ -428,6 +468,7 @@ class AS5600:  # noqa PLR0904
     def slow_filter(self) -> int:
         """
         Get and set the Slow Filter (SF) configuration.
+
         Valid values: SLOW_FILTER_16X, SLOW_FILTER_8X, SLOW_FILTER_4X & SLOW_FILTER_2X
 
         :return: The slow filter value as an integer.
@@ -448,6 +489,7 @@ class AS5600:  # noqa PLR0904
     def fast_filter(self) -> int:
         """
         Get and set the Fast Filter Threshold (FTH) configuration.
+
         Valid values: FAST_FILTER_THRESHOLD_SLOW, FAST_FILTER_THRESHOLD_6LSB, \
         FAST_FILTER_THRESHOLD_7LSB,
 
@@ -470,7 +512,8 @@ class AS5600:  # noqa PLR0904
         """
         Get and set the Watchdog (WD) configuration.
         True enables the watchdog.
-        The watchdog timer allows saving power by switching into low power mode LMP3 if the angle
+
+        The watchdog configuration saves power by switching into low power mode LMP3 if the angle
         stays within the watchdog threshold of 4 LSB for at least one minute.
 
         :return: The watchdog value as an integer.
@@ -486,18 +529,44 @@ class AS5600:  # noqa PLR0904
 
     def burn_in_angle(self):
         """
-        Perform a permanent writing of ZPOS and MPOS to non-volatile memory.
-         The BURN_ANGLE command can be executed up to 3 times.
-         zcmo shows how many times ZPOS and MPOS have been permanently written.
+        Perform a permanent writing of ZPOS and MPOS values to non-volatile memory.
+        These are set by zero_position() and max_position().
+
+        burn_in_angle() can only be executed sucessfully up to 3 times due to device restrictions.
+        burn_in_angle() can only be executed if is_magnet_detected = True.
+
+        zmco shows how many times ZPOS and MPOS have been permanently written.
         """
+        if self.is_magnet_detected is False:
+            raise RuntimeError("Magnet must be detected before burn-in can be executed")
+
+        if self.zmco >= 3:
+            raise ValueError("Burn-in can only be executed up to 3 times")
+
         self._write_8(_REG_BURN, _BURN_ANGLE_COMMAND)
 
     def burn_in_settings(self):
         """
         Perform a permanent writing of MANG and CONFIG to non-volatile memory.
-        MANG can be written only if ZPOS and MPOS have never been permanently written (zcmo = 0).
-        burn_in_settings can be performed only one time.
+
+        MANG is set by max_angle().
+
+        MANG can be written only if ZPOS and MPOS have never been permanently written (zmco = 0).
+
+        CONFIG contains the combination of all values set by the configuration methods.
+
+        These are watch_dog, power_mode, hysteresis, output_stage, pwm_frequency,
+        fast_filter & slow_filter.
+
+        burn_in_settings() can be performed only one time due to device restrictions,
+        and should be performed before burn_in_angle().
         """
+        if self.zmco != 0:
+            raise ValueError(
+                "Can only be written if ZPOS and MPOS have never been permanently written \
+                with burn_in_angle()"
+            )
+
         self._write_8(_REG_BURN, _BURN_SETTINGS_COMMAND)
 
     # Internal Class Functions
