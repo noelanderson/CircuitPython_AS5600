@@ -33,6 +33,11 @@ __repo__ = "https://github.com/noelanderson/CircuitPython_AS5600.git"
 from adafruit_bus_device import i2c_device
 from micropython import const
 
+try:
+    from typing import NoReturn
+except ImportError:
+    pass
+
 # Register Map & bit positions
 
 _AS5600_DEFAULT_I2C_ADDR = const(0x36)
@@ -45,9 +50,9 @@ _REG_MANG_HI = const(0x05)  # R/W/P
 _REG_MANG_LO = const(0x06)  # R/W/P
 
 # ---------------------------------------------------------------#
-#   7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
+#    7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
 # -------+-------+-------+-------+-------+-------+-------+-------|
-#       |       |   WD  |          FTH          |       SF      |
+#        |       |   WD  |          FTH          |       SF      |
 # ---------------------------------------------------------------#
 _REG_CONF_HI = const(0x07)  # R/W/P
 _BIT_POS_SF = const(0)
@@ -55,9 +60,9 @@ _BIT_POS_FTH = const(2)
 _BIT_POS_WD = const(5)
 
 # ---------------------------------------------------------------#
-#   7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
+#    7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
 # -------+-------+-------+-------+-------+-------+-------+-------|
-#      PWMF     |     OUTS      |     HYST      |      PM       |
+#       PWMF     |     OUTS      |     HYST      |      PM       |
 # ---------------------------------------------------------------#
 _REG_CONF_LO = const(0x08)  # R/W/P
 _BIT_POS_PM = const(0)
@@ -71,9 +76,9 @@ _REG_ANGLE_HI = const(0x0E)  # R
 _REG_ANGLE_LO = const(0x0F)  # R
 
 # ---------------------------------------------------------------#
-#   7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
+#    7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
 # -------+-------+-------+-------+-------+-------+-------+-------|
-#       |       |   MD  |   ML  |   MH  |       |       |       |
+#        |       |   MD  |   ML  |   MH  |       |       |       |
 # ---------------------------------------------------------------#
 _REG_STATUS = const(0x0B)  # R
 _STATUS_MH = const(0b00001000)
@@ -98,42 +103,74 @@ _3_BITS = const(0b00000111)
 # User-facing constants:
 
 POWER_MODE_NOM = const(0)
+""" Always on (PM) mode - 6.5mA"""
 POWER_MODE_LPM1 = const(1)
+""" Low Power (LPM1) mode - 3.4mA, Polling Time = 5mS"""
 POWER_MODE_LPM2 = const(2)
+""" Low Power (LPM2) mode - 1.8mA, Polling Time = 20mS"""
 POWER_MODE_LPM3 = const(3)
+""" Low Power (LPM2) mode - 1.5mA, Polling Time = 100mS"""
 
 HYSTERESIS_OFF = const(0)
+""" Hysteresis (HYST) off"""
 HYSTERESIS_1LSB = const(1)
+""" Hysteresis (HYST) 1 LSB"""
 HYSTERESIS_2LSB = const(2)
+""" Hysteresis (HYST) 2 LSB"""
 HYSTERESIS_3LSB = const(3)
+""" Hysteresis (HYST) 3 LSB"""
 
 OUTPUT_STAGE_ANALOG_FULL = const(0)
+""" Output Stage (OUTS) full range analog output 0-100% GND to VDD"""
 OUTPUT_STAGE_ANALOG_REDUCED = const(1)
+""" Output Stage (OUTS) reduced range analog output 10-90% GND to VDD"""
 OUTPUT_STAGE_DIGITAL_PWM = const(2)
+""" Output Stage (OUTS) digital PWM output"""
 
 PWM_FREQUENCY_115HZ = const(0)
+"""  PWM Frequency (PWMF) 115Hz"""
 PWM_FREQUENCY_230HZ = const(1)
+""" PWM Frequency (PWMF) 230Hz"""
 PWM_FREQUENCY_460HZ = const(2)
+"""PWM Frequency (PWMF) 460Hz"""
 PWM_FREQUENCY_920HZ = const(3)
+""" PWM Frequency (PWMF) 920Hz"""
 
 SLOW_FILTER_16X = const(0)
+""" Slow Filter (SF) 16x"""
 SLOW_FILTER_8X = const(1)
+"""  Slow Filter (SF) 8x"""
 SLOW_FILTER_4X = const(2)
+"""  Slow Filter (SF) 4x"""
 SLOW_FILTER_2X = const(3)
+""" Slow Filter (SF) 2x"""
 
 FAST_FILTER_THRESHOLD_SLOW = const(0)
+""" Fast Filter off. Slow Filter only"""
 FAST_FILTER_THRESHOLD_6LSB = const(1)
+""" Fast Filter Threshold (FTH) 6 LSB"""
 FAST_FILTER_THRESHOLD_7LSB = const(2)
+"""  Fast Filter Threshold (FTH) 7 LSB"""
 FAST_FILTER_THRESHOLD_9LSB = const(3)
+""" Fast Filter Threshold (FTH) 9 LSB"""
 FAST_FILTER_THRESHOLD_18LSB = const(4)
+"""  Fast Filter Threshold (FTH) 18 LSB"""
 FAST_FILTER_THRESHOLD_21LSB = const(5)
+""" Fast Filter Threshold (FTH) 21 LSB"""
 FAST_FILTER_THRESHOLD_24LSB = const(6)
+"""  Fast Filter Threshold (FTH) 24 LSB"""
 FAST_FILTER_THRESHOLD_10LSB = const(7)
+""" Fast Filter Threshold (FTH) 10 LSB"""
 
 
 class AS5600:  # noqa PLR0904
     """
-    Initialise the PCA9955 chip at ``address`` on ``i2c_bus``.
+    Initialize the AS5600 chip at ``address`` on ``i2c_bus``.
+
+    :param i2c: The I2C bus object.
+    :type i2c: I2C
+    :param address: The I2C address of the device. Default is 0x36.
+    :type address: int
     """
 
     def __init__(self, i2c, address=_AS5600_DEFAULT_I2C_ADDR):
@@ -143,88 +180,180 @@ class AS5600:  # noqa PLR0904
 
     @property
     def angle(self):
-        """Get the current 12-bit angle (ANGLE)."""
+        """
+        Get the current 12-bit angle (ANGLE).
+
+        :return: The current angle as an integer.
+        :rtype: int
+        """
         return self._read_16(_REG_ANGLE_HI)
+
+    @angle.setter
+    def angle(self) -> NoReturn:  # noqa PLR6301
+        raise AttributeError("angle is read-only")
 
     @property
     def raw_angle(self):
-        """Get the current unscaled and unmodified 12-bit angle (RAWANGLE)."""
+        """
+        Get the current unscaled and unmodified 12-bit angle (RAWANGLE).
+
+        :return: The current raw angle as an integer.
+        :rtype: int
+        """
         return self._read_16(_REG_RAW_ANGLE_HI)
+
+    @raw_angle.setter
+    def raw_angle(self) -> NoReturn:  # noqa PLR6301
+        raise AttributeError("raw_angle is read-only")
 
     # Status Registers
 
     @property
     def is_magnet_too_strong(self) -> bool:
-        """Test MH Status Bit"""
+        """
+        Test MH Status Bit.
+
+        :return: True if the magnet is too strong, False otherwise.
+        :rtype: bool
+        """
         return bool(self._read_8(_REG_STATUS) & _STATUS_MH)
+
+    @is_magnet_too_strong.setter
+    def is_magnet_too_strong(self, value: bool) -> NoReturn:  # noqa PLR6301
+        raise AttributeError("is_magnet_too_strong is read-only")
 
     @property
     def is_magnet_too_weak(self) -> bool:
-        """Test ML Status Bit"""
+        """
+        Test ML Status Bit.
+
+        :return: True if the magnet is too weak, False otherwise.
+        :rtype: bool
+        """
         return bool(self._read_8(_REG_STATUS) & _STATUS_ML)
+
+    @is_magnet_too_weak.setter
+    def is_magnet_too_weak(self, value: bool) -> NoReturn:  # noqa PLR6301
+        raise AttributeError("is_magnet_too_weak is read-only")
 
     @property
     def is_magnet_detected(self) -> bool:
-        """Test MD Status Bit"""
+        """
+        Test MD Status Bit.
+
+        :return: True if a magnet is detected, False otherwise.
+        :rtype: bool
+        """
         return bool(self._read_8(_REG_STATUS) & _STATUS_MD)
+
+    @is_magnet_detected.setter
+    def is_magnet_detected(self, value: bool) -> NoReturn:  # noqa PLR6301
+        raise AttributeError("is_magnet_detected is read-only")
 
     @property
     def gain(self) -> int:
-        """Get the 8-bit Automatic Gain Control value (AGC)."""
+        """
+        Get the 8-bit Automatic Gain Control value (AGC).
+
+        :return: The AGC value as an integer.
+        :rtype: int
+        """
         return self._read_8(_REG_AGC)
+
+    @gain.setter
+    def gain(self, value: int) -> NoReturn:  # noqa PLR6301
+        raise AttributeError("gain is read-only")
 
     @property
     def magnitude(self) -> int:
-        """Get the 12-bit CORDIC magnitude (MAGNITUDE)."""
+        """
+        Get the 12-bit CORDIC magnitude (MAGNITUDE).
+
+        :return: The magnitude value as an integer.
+        :rtype: int
+        """
         return self._read_16(_REG_MAGNITUDE_HI)
+
+    @magnitude.setter
+    def magnitude(self, value: int) -> NoReturn:  # noqa PLR6301
+        raise AttributeError("magnitude is read-only")
 
     # Configuration Registers
 
     @property
     def zmco(self) -> int:
-        """Get the 8-bit burn count (ZMCO)."""
+        """
+        Get the 8-bit burn count (ZMCO).
+
+        :return: The burn count as an integer.
+        :rtype: int
+        """
         return self._read_8(_REG_ZMCO)
+
+    @zmco.setter
+    def zmco(self, value: int) -> NoReturn:  # noqa PLR6301
+        raise AttributeError("zmco is read-only")
 
     @property
     def zero_position(self) -> int:
-        """Get and set the 12-bit zero position (ZPOS)."""
+        """
+        Get and set the 12-bit zero position (ZPOS).
+
+        :return: The zero position as an integer.
+        :rtype: int
+        """
         return self._read_16(_REG_ZPOS_HI)
 
     @zero_position.setter
-    def zero_position(self, value: int) -> int:
+    def zero_position(self, value: int):
         if not 0 <= value <= 4095:
             raise ValueError("Value must be between 0 & 4095")
         self._write_16(_REG_ZPOS_HI, value)
 
     @property
     def max_position(self) -> int:
-        """Get and set the 12-bit maximum position (MPOS)."""
+        """
+        Get and set the 12-bit maximum position (MPOS).
+
+        :return: The maximum position as an integer.
+        :rtype: int
+        """
         return self._read_16(_REG_MPOS_HI)
 
     @max_position.setter
-    def max_position(self, value: int) -> int:
+    def max_position(self, value: int):
         if not 0 <= value <= 4095:
             raise ValueError("Value must be between 0 & 4095")
         self._write_16(_REG_MPOS_HI, value)
 
     @property
     def max_angle(self) -> int:
-        """Get and set the 12-bit maximum angle (MANG)."""
+        """
+        Get and set the 12-bit maximum angle (MANG).
+
+        :return: The maximum angle as an integer.
+        :rtype: int
+        """
         return self._read_16(_REG_MANG_HI)
 
     @max_angle.setter
-    def max_angle(self, value: int) -> int:
+    def max_angle(self, value: int):
         if not 0 <= value <= 4095:
             raise ValueError("Value must be between 0 & 4095")
         self._write_16(_REG_MANG_HI, value)
 
     @property
     def power_mode(self) -> int:
-        """Get and set the Power Mode (PM) configuration."""
+        """
+        Get and set the Power Mode (PM) configuration.
+
+        :return: The power mode as an integer.
+        :rtype: int
+        """
         return self._read_conf_register(_REG_CONF_LO, _2_BITS, _BIT_POS_PM)
 
     @power_mode.setter
-    def power_mode(self, value: int) -> int:
+    def power_mode(self, value: int):
         if not POWER_MODE_NOM <= value <= POWER_MODE_LPM3:
             raise ValueError(
                 f"Power Mode (PM) value must be between {POWER_MODE_NOM} & {POWER_MODE_LPM3}"
@@ -233,11 +362,18 @@ class AS5600:  # noqa PLR0904
 
     @property
     def hysteresis(self) -> int:
-        """Get and set the Hysteresis (HYST) configuration."""
+        """
+        Get and set the Hysteresis (HYST) configuration.
+        Set to avoid toggling of the output when the magnet is not moving.
+        Valid values: HYSTERESIS_OFF, HYSTERESIS_1LSB, HYSTERESIS_2LSB & HYSTERESIS_3LSB
+
+        :return: The hysteresis value as an integer.
+        :rtype: int
+        """
         return self._read_conf_register(_REG_CONF_LO, _2_BITS, _BIT_POS_HYST)
 
     @hysteresis.setter
-    def hysteresis(self, value: int) -> int:
+    def hysteresis(self, value: int):
         if not HYSTERESIS_OFF <= value <= HYSTERESIS_3LSB:
             raise ValueError(
                 f"Hysteresis (HYST) value must be between {HYSTERESIS_OFF} & {HYSTERESIS_3LSB}"
@@ -246,84 +382,134 @@ class AS5600:  # noqa PLR0904
 
     @property
     def output_stage(self) -> int:
-        """Get and set the Output Stage (OUTS) configuration."""
+        """
+        Get and set the Output Stage configuration.
+        This controls the output of pin 3 (OUT) as either an analog or PWM signal.
+        Valid values: OUTPUT_STAGE_ANALOG_FULL, OUTPUT_STAGE_ANALOG_REDUCED, \
+        OUTPUT_STAGE_DIGITAL_PWM
+
+        :return: The output stage value as an integer.
+        :rtype: int
+        """
         return self._read_conf_register(_REG_CONF_LO, _2_BITS, _BIT_POS_OUTS)
 
     @output_stage.setter
-    def output_stage(self, value: int) -> int:
+    def output_stage(self, value: int):
         if not OUTPUT_STAGE_ANALOG_FULL <= value <= OUTPUT_STAGE_DIGITAL_PWM:
             raise ValueError(
-                f"Output Stage (OUTS) value must be between{OUTPUT_STAGE_ANALOG_FULL} \
-                & {OUTPUT_STAGE_DIGITAL_PWM}"
+                f"Output Stage (OUTS) value must be between {OUTPUT_STAGE_ANALOG_FULL} \
+        & {OUTPUT_STAGE_DIGITAL_PWM}"
             )
         self._write_conf_register(_REG_CONF_LO, _2_BITS, _BIT_POS_OUTS, value)
 
     @property
     def pwm_frequency(self) -> int:
-        """Get and set the PWM Frequency (PWMF) configuration."""
+        """
+        Get and set the PWM Frequency (PWMF) configuration.
+        Sets the frequency of the PWM output. Ignored if output_stage is not analog.
+        Valid values: PWM_FREQUENCY_115HZ, PWM_FREQUENCY_230HZ, PWM_FREQUENCY_460HZ \
+        & PWM_FREQUENCY_920HZ
+
+        :return: The PWM frequency value as an integer.
+        :rtype: int
+        """
         return self._read_conf_register(_REG_CONF_LO, _2_BITS, _BIT_POS_PWMF)
 
     @pwm_frequency.setter
-    def pwm_frequency(self, value: int) -> int:
+    def pwm_frequency(self, value: int):
         if not PWM_FREQUENCY_115HZ <= value <= PWM_FREQUENCY_920HZ:
             raise ValueError(
                 f"PWM Frequency (PWMF) value must be between {PWM_FREQUENCY_115HZ} \
-                & {PWM_FREQUENCY_920HZ}"
+        & {PWM_FREQUENCY_920HZ}"
             )
         self._write_conf_register(_REG_CONF_LO, _2_BITS, _BIT_POS_PWMF, value)
 
     @property
     def slow_filter(self) -> int:
-        """Get and set the Slow Filter (SF) configuration."""
+        """
+        Get and set the Slow Filter (SF) configuration.
+        Valid values: SLOW_FILTER_16X, SLOW_FILTER_8X, SLOW_FILTER_4X & SLOW_FILTER_2X
+
+        :return: The slow filter value as an integer.
+        :rtype: int
+        """
         return self._read_conf_register(_REG_CONF_HI, _2_BITS, _BIT_POS_SF)
 
     @slow_filter.setter
-    def slow_filter(self, value: int) -> int:
+    def slow_filter(self, value: int):
         if not SLOW_FILTER_16X <= value <= SLOW_FILTER_2X:
             raise ValueError(
-                f"Slow  Filter (SF) value must be between {SLOW_FILTER_16X} & {SLOW_FILTER_2X}"
+                f"Slow Filter (SF) value must be between {SLOW_FILTER_16X} & {SLOW_FILTER_2X}"
             )
         self._write_conf_register(_REG_CONF_HI, _2_BITS, _BIT_POS_SF, value)
 
     @property
     def fast_filter(self) -> int:
-        """Get and set the Fast Filter Threshold (FTH) configuration."""
+        """
+        Get and set the Fast Filter Threshold (FTH) configuration.
+        Valid values: FAST_FILTER_THRESHOLD_SLOW, FAST_FILTER_THRESHOLD_6LSB, \
+        FAST_FILTER_THRESHOLD_7LSB,
+
+        :return: The fast filter threshold value as an integer.
+        :rtype: int
+        """
         return self._read_conf_register(_REG_CONF_HI, _3_BITS, _BIT_POS_FTH)
 
     @fast_filter.setter
-    def fast_filter(self, value: int) -> int:
+    def fast_filter(self, value: int):
         if not FAST_FILTER_THRESHOLD_SLOW <= value <= FAST_FILTER_THRESHOLD_10LSB:
             raise ValueError(
-                f"Fast  Filter (FTH) value must be between {FAST_FILTER_THRESHOLD_SLOW} \
-                & {FAST_FILTER_THRESHOLD_10LSB}"
+                f"Fast Filter (FTH) value must be between {FAST_FILTER_THRESHOLD_SLOW} \
+        & {FAST_FILTER_THRESHOLD_10LSB}"
             )
         self._write_conf_register(_REG_CONF_HI, _3_BITS, _BIT_POS_FTH, value)
 
     @property
-    def watch_dog(self) -> int:
-        """Get and set the Watchdog (WD) configuration."""
-        return self._read_conf_register(_REG_CONF_HI, _1_BIT, _BIT_POS_WD)
+    def watch_dog(self) -> bool:
+        """
+        Get and set the Watchdog (WD) configuration.
+        True enables the watchdog.
+        The watchdog timer allows saving power by switching into LMP3 if the angle stays
+        within the watchdog threshold of 4 LSB for at least one minute
+
+        :return: The watchdog value as an integer.
+        :rtype: int
+        """
+        return bool(self._read_conf_register(_REG_CONF_HI, _1_BIT, _BIT_POS_WD))
 
     @watch_dog.setter
-    def watch_dog(self, value: int) -> int:
-        if not 0 <= value <= 1:
-            raise ValueError("Watchdog (WD) value must be 0 or 1")
-        self._write_conf_register(_REG_CONF_HI, _1_BIT, _BIT_POS_WD, value)
+    def watch_dog(self, value: bool):
+        self._write_conf_register(_REG_CONF_HI, _1_BIT, _BIT_POS_WD, int(value))
 
     # Burn Commands
 
     def burn_in_angle(self):
-        """Perform a permanent writing of ZPOS and MPOS to non-volatile memory"""
+        """
+        Perform a permanent writing of ZPOS and MPOS to non-volatile memory.
+         The BURN_ANGLE command can be executed up to 3 times.
+         zcmo shows how many times ZPOS and MPOS have been permanently written.
+        """
         self._write_8(_REG_BURN, _BURN_ANGLE_COMMAND)
 
     def burn_in_settings(self):
-        """Perform a permanent writing of MANG and CONFIG to non-volatile memory"""
+        """
+        Perform a permanent writing of MANG and CONFIG to non-volatile memory.
+        MANG can be written only if ZPOS and MPOS have never been permanently written (zcmo = 0).
+        burn_in_settings can be performed only one time.
+        """
         self._write_8(_REG_BURN, _BURN_SETTINGS_COMMAND)
 
     # Internal Class Functions
 
     def _read_8(self, address: int) -> int:
-        # Read and return a byte from the specified 8-bit register address.
+        """
+        Read and return a byte from the specified 8-bit register address.
+
+        :param address: The register address to read from.
+        :type address: int
+        :return: The value read from the register.
+        :rtype: int
+        """
         result = bytearray(1)
         with self._device as i2c:
             i2c.write(bytes([address]))
@@ -331,7 +517,16 @@ class AS5600:  # noqa PLR0904
         return result[0]
 
     def _write_8(self, address: int, value: int) -> int:
-        # write a byte to the specified 8-bit register address.
+        """
+        Write a byte to the specified 8-bit register address.
+
+        :param address: The register address to write to.
+        :type address: int
+        :param value: The value to write to the register.
+        :type value: int
+        :return: The value written to the register.
+        :rtype: int
+        """
         result = bytearray(1)
         with self._device as i2c:
             i2c.write(bytes([address, value]))
@@ -343,6 +538,11 @@ class AS5600:  # noqa PLR0904
         """
         Read and return a 16-bit unsigned big endian value
         from the specified 16-bit register address.
+
+        :param address: The register address to read from.
+        :type address: int
+        :return: The value read from the register.
+        :rtype: int
         """
         result = bytearray(2)
         with self._device as i2c:
@@ -353,6 +553,13 @@ class AS5600:  # noqa PLR0904
     def _write_16(self, address: int, value: int) -> int:
         """
         Write a 16-bit big endian value to the specified 16-bit register address.
+
+        :param address: The register address to write to.
+        :type address: int
+        :param value: The value to write to the register.
+        :type value: int
+        :return: The value written to the register.
+        :rtype: int
         """
         result = bytearray(2)
         with self._device as i2c:
@@ -362,13 +569,37 @@ class AS5600:  # noqa PLR0904
         return (result[0] << 8) | result[1]
 
     def _read_conf_register(self, register: int, mask: int, offset: int) -> int:
-        # Read configuration register bits
+        """
+        Read configuration register bits.
+
+        :param register: The register address to read from.
+        :type register: int
+        :param mask: The bit mask to apply.
+        :type mask: int
+        :param offset: The bit offset to apply.
+        :type offset: int
+        :return: The value read from the register.
+        :rtype: int
+        """
         mask = mask << offset
         result = self._read_8(register)
         return (result & mask) >> offset
 
     def _write_conf_register(self, register: int, mask: int, offset: int, value: int) -> int:
-        # Write configuration register bits
+        """
+        Write configuration register bits.
+
+        :param register: The register address to write to.
+        :type register: int
+        :param mask: The bit mask to apply.
+        :type mask: int
+        :param offset: The bit offset to apply.
+        :type offset: int
+        :param value: The value to write to the register.
+        :type value: int
+        :return: The value written to the register.
+        :rtype: int
+        """
         mask = mask << offset
         inverse_mask = ~mask & 0xFF
         current_value = self._read_8(register)
