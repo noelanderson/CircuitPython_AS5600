@@ -2,6 +2,7 @@
 ' SPDX-License-Identifier: MIT
 
 @startuml AS5600
+
 class AS5600 {
     + AS5600 (i2c : I2C, address : int)
     ..
@@ -74,6 +75,11 @@ enum FastFilterThreshold {
     FAST_FILTER_THRESHOLD_24LSB : int = 6
     FAST_FILTER_THRESHOLD_10LSB : int = 7
 }
+
+'force layout
+PWMFrequency-[hidden]--> SlowFilter
+PWMFrequency-[hidden]--> FastFilterThreshold
+PowerMode-[hidden]--> Hysteresis
 
 AS5600 -- PowerMode
 AS5600 -- Hysteresis

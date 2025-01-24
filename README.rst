@@ -108,10 +108,13 @@ Usage Example
 
 Documentation
 =============
-API documentation for this library can be found on `Read the Docs <https://circuitpython-as5600.readthedocs.io/>`_.
 
-For information on building library documentation, please check out
-`this guide <https://learn.adafruit.com/creating-and-sharing-a-circuitpython-library/sharing-our-docs-on-readthedocs#sphinx-5-1>`_.
+Class Diagram for library
+
+.. figure:: https://raw.githubusercontent.com/noelanderson/CircuitPython_AS5600/master/uml/as5600.svg
+   :alt: Class Diagram
+
+API documentation for this library can be found on `Read the Docs <https://circuitpython-as5600.readthedocs.io/>`_.
 
 Contributing
 ============
