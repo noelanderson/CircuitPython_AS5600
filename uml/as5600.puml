@@ -1,0 +1,84 @@
+' SPDX-FileCopyrightText: Copyright (c) 2025 Noel Anderson
+' SPDX-License-Identifier: MIT
+
+@startuml AS5600
+class AS5600 {
+    + AS5600 (i2c : I2C, address : int)
+    ..
+    + {field} angle : int
+    + {field} raw_angle : int
+    .. config ..
+    + {field} zero_position : int
+    + {field} max_position : int
+    + {field} max_angle : int
+    + {field} power_mode : PowerMode
+    + {field} hysteresis : Hysteresis
+    + {field} output_stage : OutputStage
+    + {field} pwm_frequency : PWMFrequency
+    + {field} slow_filter : SlowFilter
+    + {field} fast_filter : FastFilterThreshold
+    + {field} watch_dog : bool {field}
+    .. status ..
+    + {field} is_magnet_too_strong : bool
+    + {field} is_magnet_too_weak : bool
+    + {field} is_magnet_detected : bool
+    + {field} gain : int {field}
+    + {field} magnitude : int
+    + {field} zmco : int {field}
+    .. permanent programming ..
+    + {method} burn_in_angle() : void
+    + {method} burn_in_settings() : void
+}
+
+enum PowerMode {
+    POWER_MODE_NOM : int = 0
+    POWER_MODE_LPM1 : int = 1
+    POWER_MODE_LPM2 : int = 2
+    POWER_MODE_LPM3 : int = 3
+}
+
+enum Hysteresis {
+    HYSTERESIS_OFF : int = 0
+    HYSTERESIS_1LSB : int = 1
+    HYSTERESIS_2LSB : int = 2
+    HYSTERESIS_3LSB : int = 3
+}
+
+enum OutputStage {
+    OUTPUT_STAGE_ANALOG_FULL : int = 0
+    OUTPUT_STAGE_ANALOG_REDUCED : int = 1
+    OUTPUT_STAGE_DIGITAL_PWM : int = 2
+}
+
+enum PWMFrequency {
+    PWM_FREQUENCY_115HZ : int = 0
+    PWM_FREQUENCY_230HZ : int = 1
+    PWM_FREQUENCY_460HZ : int = 2
+    PWM_FREQUENCY_920HZ : int = 3
+}
+
+enum SlowFilter {
+    SLOW_FILTER_16X : int = 0
+    SLOW_FILTER_8X : int = 1
+    SLOW_FILTER_4X : int = 2
+    SLOW_FILTER_2X : int = 3
+}
+
+enum FastFilterThreshold {
+    FAST_FILTER_THRESHOLD_SLOW : int = 0
+    FAST_FILTER_THRESHOLD_6LSB : int = 1
+    FAST_FILTER_THRESHOLD_7LSB : int = 2
+    FAST_FILTER_THRESHOLD_9LSB : int = 3
+    FAST_FILTER_THRESHOLD_18LSB : int = 4
+    FAST_FILTER_THRESHOLD_21LSB : int = 5
+    FAST_FILTER_THRESHOLD_24LSB : int = 6
+    FAST_FILTER_THRESHOLD_10LSB : int = 7
+}
+
+AS5600 -- PowerMode
+AS5600 -- Hysteresis
+AS5600 -- OutputStage
+AS5600 -- PWMFrequency
+AS5600 -- SlowFilter
+AS5600 -- FastFilterThreshold
+@enduml
