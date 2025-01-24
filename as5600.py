@@ -118,7 +118,7 @@ class AS5600:  # noqa PLR0904
     POWER_MODE_LPM2 = const(2)
     """ Low Power (LPM2) mode - 1.8mA, Polling Time = 20mS"""
     POWER_MODE_LPM3 = const(3)
-    """ Low Power (LPM2) mode - 1.5mA, Polling Time = 100mS"""
+    """ Low Power (LPM3) mode - 1.5mA, Polling Time = 100mS"""
 
     HYSTERESIS_OFF = const(0)
     """ Hysteresis (HYST) off"""
@@ -470,8 +470,8 @@ class AS5600:  # noqa PLR0904
         """
         Get and set the Watchdog (WD) configuration.
         True enables the watchdog.
-        The watchdog timer allows saving power by switching into LMP3 if the angle stays
-        within the watchdog threshold of 4 LSB for at least one minute
+        The watchdog timer allows saving power by switching into low power mode LMP3 if the angle
+        stays within the watchdog threshold of 4 LSB for at least one minute.
 
         :return: The watchdog value as an integer.
         :rtype: int
