@@ -97,7 +97,7 @@ Usage Example
     import time
     import board
     import busio
-    from adafruit_as5600 import AS5600
+    from as5600 import AS5600
 
     i2c = busio.I2C(board.SCL, board.SDA)
     sensor = AS5600(i2c)

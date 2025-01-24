@@ -100,69 +100,6 @@ _2_BITS = const(0b00000011)
 _3_BITS = const(0b00000111)
 
 
-# User-facing constants:
-
-POWER_MODE_NOM = const(0)
-""" Always on (PM) mode - 6.5mA"""
-POWER_MODE_LPM1 = const(1)
-""" Low Power (LPM1) mode - 3.4mA, Polling Time = 5mS"""
-POWER_MODE_LPM2 = const(2)
-""" Low Power (LPM2) mode - 1.8mA, Polling Time = 20mS"""
-POWER_MODE_LPM3 = const(3)
-""" Low Power (LPM2) mode - 1.5mA, Polling Time = 100mS"""
-
-HYSTERESIS_OFF = const(0)
-""" Hysteresis (HYST) off"""
-HYSTERESIS_1LSB = const(1)
-""" Hysteresis (HYST) 1 LSB"""
-HYSTERESIS_2LSB = const(2)
-""" Hysteresis (HYST) 2 LSB"""
-HYSTERESIS_3LSB = const(3)
-""" Hysteresis (HYST) 3 LSB"""
-
-OUTPUT_STAGE_ANALOG_FULL = const(0)
-""" Output Stage (OUTS) full range analog output 0-100% GND to VDD"""
-OUTPUT_STAGE_ANALOG_REDUCED = const(1)
-""" Output Stage (OUTS) reduced range analog output 10-90% GND to VDD"""
-OUTPUT_STAGE_DIGITAL_PWM = const(2)
-""" Output Stage (OUTS) digital PWM output"""
-
-PWM_FREQUENCY_115HZ = const(0)
-"""  PWM Frequency (PWMF) 115Hz"""
-PWM_FREQUENCY_230HZ = const(1)
-""" PWM Frequency (PWMF) 230Hz"""
-PWM_FREQUENCY_460HZ = const(2)
-"""PWM Frequency (PWMF) 460Hz"""
-PWM_FREQUENCY_920HZ = const(3)
-""" PWM Frequency (PWMF) 920Hz"""
-
-SLOW_FILTER_16X = const(0)
-""" Slow Filter (SF) 16x"""
-SLOW_FILTER_8X = const(1)
-"""  Slow Filter (SF) 8x"""
-SLOW_FILTER_4X = const(2)
-"""  Slow Filter (SF) 4x"""
-SLOW_FILTER_2X = const(3)
-""" Slow Filter (SF) 2x"""
-
-FAST_FILTER_THRESHOLD_SLOW = const(0)
-""" Fast Filter off. Slow Filter only"""
-FAST_FILTER_THRESHOLD_6LSB = const(1)
-""" Fast Filter Threshold (FTH) 6 LSB"""
-FAST_FILTER_THRESHOLD_7LSB = const(2)
-"""  Fast Filter Threshold (FTH) 7 LSB"""
-FAST_FILTER_THRESHOLD_9LSB = const(3)
-""" Fast Filter Threshold (FTH) 9 LSB"""
-FAST_FILTER_THRESHOLD_18LSB = const(4)
-"""  Fast Filter Threshold (FTH) 18 LSB"""
-FAST_FILTER_THRESHOLD_21LSB = const(5)
-""" Fast Filter Threshold (FTH) 21 LSB"""
-FAST_FILTER_THRESHOLD_24LSB = const(6)
-"""  Fast Filter Threshold (FTH) 24 LSB"""
-FAST_FILTER_THRESHOLD_10LSB = const(7)
-""" Fast Filter Threshold (FTH) 10 LSB"""
-
-
 class AS5600:  # noqa PLR0904
     """
     Initialize the AS5600 chip at ``address`` on ``i2c_bus``.
@@ -172,6 +109,67 @@ class AS5600:  # noqa PLR0904
     :param address: The I2C address of the device. Default is 0x36.
     :type address: int
     """
+
+    # User-facing constants:
+    POWER_MODE_NOM = const(0)
+    """ Always on (PM) mode - 6.5mA"""
+    POWER_MODE_LPM1 = const(1)
+    """ Low Power (LPM1) mode - 3.4mA, Polling Time = 5mS"""
+    POWER_MODE_LPM2 = const(2)
+    """ Low Power (LPM2) mode - 1.8mA, Polling Time = 20mS"""
+    POWER_MODE_LPM3 = const(3)
+    """ Low Power (LPM2) mode - 1.5mA, Polling Time = 100mS"""
+
+    HYSTERESIS_OFF = const(0)
+    """ Hysteresis (HYST) off"""
+    HYSTERESIS_1LSB = const(1)
+    """ Hysteresis (HYST) 1 LSB"""
+    HYSTERESIS_2LSB = const(2)
+    """ Hysteresis (HYST) 2 LSB"""
+    HYSTERESIS_3LSB = const(3)
+    """ Hysteresis (HYST) 3 LSB"""
+
+    OUTPUT_STAGE_ANALOG_FULL = const(0)
+    """ Output Stage (OUTS) full range analog output 0-100% GND to VDD"""
+    OUTPUT_STAGE_ANALOG_REDUCED = const(1)
+    """ Output Stage (OUTS) reduced range analog output 10-90% GND to VDD"""
+    OUTPUT_STAGE_DIGITAL_PWM = const(2)
+    """ Output Stage (OUTS) digital PWM output"""
+
+    PWM_FREQUENCY_115HZ = const(0)
+    """  PWM Frequency (PWMF) 115Hz"""
+    PWM_FREQUENCY_230HZ = const(1)
+    """ PWM Frequency (PWMF) 230Hz"""
+    PWM_FREQUENCY_460HZ = const(2)
+    """PWM Frequency (PWMF) 460Hz"""
+    PWM_FREQUENCY_920HZ = const(3)
+    """ PWM Frequency (PWMF) 920Hz"""
+
+    SLOW_FILTER_16X = const(0)
+    """ Slow Filter (SF) 16x"""
+    SLOW_FILTER_8X = const(1)
+    """  Slow Filter (SF) 8x"""
+    SLOW_FILTER_4X = const(2)
+    """  Slow Filter (SF) 4x"""
+    SLOW_FILTER_2X = const(3)
+    """ Slow Filter (SF) 2x"""
+
+    FAST_FILTER_THRESHOLD_SLOW = const(0)
+    """ Fast Filter off. Slow Filter only"""
+    FAST_FILTER_THRESHOLD_6LSB = const(1)
+    """ Fast Filter Threshold (FTH) 6 LSB"""
+    FAST_FILTER_THRESHOLD_7LSB = const(2)
+    """  Fast Filter Threshold (FTH) 7 LSB"""
+    FAST_FILTER_THRESHOLD_9LSB = const(3)
+    """ Fast Filter Threshold (FTH) 9 LSB"""
+    FAST_FILTER_THRESHOLD_18LSB = const(4)
+    """  Fast Filter Threshold (FTH) 18 LSB"""
+    FAST_FILTER_THRESHOLD_21LSB = const(5)
+    """ Fast Filter Threshold (FTH) 21 LSB"""
+    FAST_FILTER_THRESHOLD_24LSB = const(6)
+    """  Fast Filter Threshold (FTH) 24 LSB"""
+    FAST_FILTER_THRESHOLD_10LSB = const(7)
+    """ Fast Filter Threshold (FTH) 10 LSB"""
 
     def __init__(self, i2c, address=_AS5600_DEFAULT_I2C_ADDR):
         self._device = i2c_device.I2CDevice(i2c, address)
@@ -354,9 +352,10 @@ class AS5600:  # noqa PLR0904
 
     @power_mode.setter
     def power_mode(self, value: int):
-        if not POWER_MODE_NOM <= value <= POWER_MODE_LPM3:
+        if not AS5600.POWER_MODE_NOM <= value <= AS5600.POWER_MODE_LPM3:
             raise ValueError(
-                f"Power Mode (PM) value must be between {POWER_MODE_NOM} & {POWER_MODE_LPM3}"
+                f"Power Mode (PM) value must be between {AS5600.POWER_MODE_NOM} & \
+                {AS5600.POWER_MODE_LPM3}"
             )
         self._write_conf_register(_REG_CONF_LO, _2_BITS, _BIT_POS_PM, value)
 
@@ -374,9 +373,10 @@ class AS5600:  # noqa PLR0904
 
     @hysteresis.setter
     def hysteresis(self, value: int):
-        if not HYSTERESIS_OFF <= value <= HYSTERESIS_3LSB:
+        if not AS5600.HYSTERESIS_OFF <= value <= AS5600.HYSTERESIS_3LSB:
             raise ValueError(
-                f"Hysteresis (HYST) value must be between {HYSTERESIS_OFF} & {HYSTERESIS_3LSB}"
+                f"Hysteresis (HYST) value must be between {AS5600.HYSTERESIS_OFF} &\
+                {AS5600.HYSTERESIS_3LSB}"
             )
         self._write_conf_register(_REG_CONF_LO, _2_BITS, _BIT_POS_HYST, value)
 
@@ -395,10 +395,10 @@ class AS5600:  # noqa PLR0904
 
     @output_stage.setter
     def output_stage(self, value: int):
-        if not OUTPUT_STAGE_ANALOG_FULL <= value <= OUTPUT_STAGE_DIGITAL_PWM:
+        if not AS5600.OUTPUT_STAGE_ANALOG_FULL <= value <= AS5600.OUTPUT_STAGE_DIGITAL_PWM:
             raise ValueError(
-                f"Output Stage (OUTS) value must be between {OUTPUT_STAGE_ANALOG_FULL} \
-        & {OUTPUT_STAGE_DIGITAL_PWM}"
+                f"Output Stage (OUTS) value must be between {AS5600.OUTPUT_STAGE_ANALOG_FULL} \
+                & {AS5600.OUTPUT_STAGE_DIGITAL_PWM}"
             )
         self._write_conf_register(_REG_CONF_LO, _2_BITS, _BIT_POS_OUTS, value)
 
@@ -417,10 +417,10 @@ class AS5600:  # noqa PLR0904
 
     @pwm_frequency.setter
     def pwm_frequency(self, value: int):
-        if not PWM_FREQUENCY_115HZ <= value <= PWM_FREQUENCY_920HZ:
+        if not AS5600.PWM_FREQUENCY_115HZ <= value <= AS5600.PWM_FREQUENCY_920HZ:
             raise ValueError(
-                f"PWM Frequency (PWMF) value must be between {PWM_FREQUENCY_115HZ} \
-        & {PWM_FREQUENCY_920HZ}"
+                f"PWM Frequency (PWMF) value must be between {AS5600.PWM_FREQUENCY_115HZ} \
+                & {AS5600.PWM_FREQUENCY_920HZ}"
             )
         self._write_conf_register(_REG_CONF_LO, _2_BITS, _BIT_POS_PWMF, value)
 
@@ -437,9 +437,10 @@ class AS5600:  # noqa PLR0904
 
     @slow_filter.setter
     def slow_filter(self, value: int):
-        if not SLOW_FILTER_16X <= value <= SLOW_FILTER_2X:
+        if not AS5600.SLOW_FILTER_16X <= value <= AS5600.SLOW_FILTER_2X:
             raise ValueError(
-                f"Slow Filter (SF) value must be between {SLOW_FILTER_16X} & {SLOW_FILTER_2X}"
+                f"Slow Filter (SF) value must be between {AS5600.SLOW_FILTER_16X} &\
+                {AS5600.SLOW_FILTER_2X}"
             )
         self._write_conf_register(_REG_CONF_HI, _2_BITS, _BIT_POS_SF, value)
 
@@ -457,10 +458,10 @@ class AS5600:  # noqa PLR0904
 
     @fast_filter.setter
     def fast_filter(self, value: int):
-        if not FAST_FILTER_THRESHOLD_SLOW <= value <= FAST_FILTER_THRESHOLD_10LSB:
+        if not AS5600.FAST_FILTER_THRESHOLD_SLOW <= value <= AS5600.FAST_FILTER_THRESHOLD_10LSB:
             raise ValueError(
-                f"Fast Filter (FTH) value must be between {FAST_FILTER_THRESHOLD_SLOW} \
-        & {FAST_FILTER_THRESHOLD_10LSB}"
+                f"Fast Filter (FTH) value must be between {AS5600.FAST_FILTER_THRESHOLD_SLOW} \
+                & {AS5600.FAST_FILTER_THRESHOLD_10LSB}"
             )
         self._write_conf_register(_REG_CONF_HI, _3_BITS, _BIT_POS_FTH, value)
 
